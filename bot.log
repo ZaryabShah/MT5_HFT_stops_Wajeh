@@ -1,0 +1,190 @@
+[2026-07-30 17:52:21] Bot starting.
+[2026-07-30 17:52:21] Connected: login 472305567 @ Exness-MT5Trial16 | balance 40.0 USD
+[2026-07-30 17:52:21] XAUUSDm: contract 100.0, digits 3, min lot 0.01, spread now 0.24
+[2026-07-30 17:52:21] Waiting 60s before first grid (per spec)...
+[2026-07-30 17:53:21] ===== CYCLE 1 ===== balance 40.00, target +4.80 (12%), lot/level 0.01 (straight run to L10 would earn 13.50)
+[2026-07-30 17:53:22]   SELL STOP L1 @ 4069.421: retcode 10006 (bad stops) (attempt 1)
+[2026-07-30 17:53:23]   SELL STOP L1 @ 4069.421: retcode 10015 (Invalid price) (attempt 2)
+[2026-07-30 17:53:23]   SELL STOP L1 @ 4069.421: retcode 10015 (Invalid price) (attempt 3)
+[2026-07-30 17:53:25] Grid placed: 21/22 orders (anchor ask 4069.961 / bid 4069.721, lot 0.01)
+[2026-07-30 17:55:13] Bot starting.
+[2026-07-30 17:55:13] Connected: login 472305567 @ Exness-MT5Trial16 | balance 40.0 USD
+[2026-07-30 17:55:13] XAUUSDm: contract 100.0, digits 3, min lot 0.01, spread now 0.24
+[2026-07-30 17:55:13] Startup cleanup: 14 positions / 7 pendings from a previous run — flattening.
+[2026-07-30 17:55:15] All positions closed, all pendings cancelled — flat.
+[2026-07-30 17:55:15] Waiting 60s before first grid (per spec)...
+[2026-07-30 17:56:15] ===== CYCLE 1 ===== balance 14.79, target +1.77 (12%), lot/level 0.01 (straight run to L10 would earn 13.50)
+[2026-07-30 17:56:16] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4070.143 / bid 4069.903, lot 0.01)
+[2026-07-30 17:58:26] No pendings and no positions left (closed externally?). Ending cycle.
+[2026-07-30 17:58:26] Nothing left to manage — stopping.
+[2026-07-30 17:58:26] Bot stopped.
+[2026-07-30 18:05:30] Bot starting.
+[2026-07-30 18:05:30] Connected: login 472305567 @ Exness-MT5Trial16 | balance 120.0 USD
+[2026-07-30 18:05:30] XAUUSDm: contract 100.0, digits 3, min lot 0.01, spread now 0.24
+[2026-07-30 18:05:30] Waiting 60s before first grid (per spec)...
+[2026-07-30 18:06:30] ===== CYCLE 1 ===== balance 120.00, target +14.40 (12%), lot/level 0.01 (straight run to L10 would earn 13.50)
+[2026-07-30 18:06:31] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4067.522 / bid 4067.282, lot 0.01)
+[2026-07-30 18:07:25] TARGET HIT: +24.71 (>= 14.40). Closing everything.
+[2026-07-30 18:07:27] All positions closed, all pendings cancelled — flat.
+[2026-07-30 18:07:27] Cycle 1 done. New balance: 155.27
+[2026-07-30 18:07:27] Waiting 30s, then restarting...
+[2026-07-30 18:07:57] ===== CYCLE 2 ===== balance 155.27, target +18.63 (12%), lot/level 0.01 (straight run to L10 would earn 13.50)
+[2026-07-30 18:07:58] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4075.263 / bid 4075.023, lot 0.01)
+[2026-07-30 18:21:42] ALL 22 STOPS TRIGGERED (both sides fully hit). P/L now -47.86. Closing everything and exiting per spec.
+[2026-07-30 18:21:43] All positions closed, all pendings cancelled — flat.
+[2026-07-30 18:21:43] Final balance: 107.48
+[2026-07-30 18:21:43] Both sides fully consumed — bot stops here per spec.
+[2026-07-30 18:21:43] Bot stopped.
+[2026-07-30 18:42:49] Bot starting.
+[2026-07-30 18:42:49] Connected: login 472305567 @ Exness-MT5Trial16 | balance 107.48 USD
+[2026-07-30 18:42:49] XAUUSDm: contract 100.0, digits 3, min lot 0.01, spread now 0.24
+[2026-07-30 18:42:49] Waiting 60s before first grid (per spec)...
+[2026-07-30 18:43:49] ===== CYCLE 1 ===== balance 107.48, target +12.90 (12%), lot/level 0.01 (straight run to L10 would earn 13.50)
+[2026-07-30 18:43:51] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4092.062 / bid 4091.822, lot 0.01)
+[2026-07-30 18:43:57] TARGET HIT: +14.92 (>= 12.90). Closing everything.
+[2026-07-30 18:43:57]   cancel #1603263551: retcode 10013 (Invalid request) (attempt 1)
+[2026-07-30 18:43:57]   cancel #1603263551: retcode 10013 (Invalid request) (attempt 2)
+[2026-07-30 18:43:58]   cancel #1603263551: retcode 10013 (Invalid request) (attempt 3)
+[2026-07-30 18:43:59] close_all retry 1: 1 positions, 0 pendings remain
+[2026-07-30 18:44:00] All positions closed, all pendings cancelled — flat.
+[2026-07-30 18:44:00] Cycle 1 done (target). New balance: 124.38
+[2026-07-30 18:44:00] STATS cycle=1 outcome=target start=107.48 end=124.38 pnl=+16.90
+[2026-07-30 18:44:00] Waiting 30s, then re-anchoring...
+[2026-07-30 18:44:30] ===== CYCLE 2 ===== balance 124.38, target +14.93 (12%), lot/level 0.01 (straight run to L10 would earn 13.50)
+[2026-07-30 18:44:31] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4095.785 / bid 4095.545, lot 0.01)
+[2026-07-30 18:44:34] PAIR CAP: 3 locked buy/sell pairs (>= 3), P/L -5.67. Flattening & re-anchoring.
+[2026-07-30 18:44:34]   cancel #1603273422: retcode 10029 (Modification failed due to order or position being close to market) (attempt 1)
+[2026-07-30 18:44:34]   cancel #1603273422: retcode 10013 (Invalid request) (attempt 2)
+[2026-07-30 18:44:35]   cancel #1603273422: retcode 10013 (Invalid request) (attempt 3)
+[2026-07-30 18:44:37] close_all retry 1: 1 positions, 0 pendings remain
+[2026-07-30 18:44:37] All positions closed, all pendings cancelled — flat.
+[2026-07-30 18:44:37] Cycle 2 done (paircap). New balance: 118.72
+[2026-07-30 18:44:37] STATS cycle=2 outcome=paircap start=124.38 end=118.72 pnl=-5.66
+[2026-07-30 18:44:37] Waiting 30s, then re-anchoring...
+[2026-07-30 18:45:07] ===== CYCLE 3 ===== balance 118.72, target +14.25 (12%), lot/level 0.01 (straight run to L10 would earn 13.50)
+[2026-07-30 18:45:07]   SELL STOP L1 @ 4090.056: retcode 10015 (Invalid price) (attempt 1)
+[2026-07-30 18:45:09] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4090.596 / bid 4090.356, lot 0.01)
+[2026-07-30 18:45:41] PAIR CAP: 3 locked buy/sell pairs (>= 3), P/L -17.23. Flattening & re-anchoring.
+[2026-07-30 18:45:42] All positions closed, all pendings cancelled — flat.
+[2026-07-30 18:45:42] Cycle 3 done (paircap). New balance: 102.85
+[2026-07-30 18:45:42] STATS cycle=3 outcome=paircap start=118.72 end=102.85 pnl=-15.87
+[2026-07-30 18:45:42] Waiting 30s, then re-anchoring...
+[2026-07-30 18:46:12] ===== CYCLE 4 ===== balance 102.85, target +12.34 (12%), lot/level 0.01 (straight run to L10 would earn 13.50)
+[2026-07-30 18:46:15]   SELL STOP L1 @ 4087.417: retcode 10006 (bad stops) (attempt 1)
+[2026-07-30 18:46:15]   SELL STOP L1 @ 4087.417: retcode 10015 (Invalid price) (attempt 2)
+[2026-07-30 18:46:16]   SELL STOP L1 @ 4087.417: retcode 10015 (Invalid price) (attempt 3)
+[2026-07-30 18:46:16]   SELL STOP L1 @ 4087.417: level already crossed, entered at market.
+[2026-07-30 18:46:16]   SELL STOP L2 @ 4087.117: retcode 10015 (Invalid price) (attempt 1)
+[2026-07-30 18:46:16]   SELL STOP L2 @ 4087.117: retcode 10015 (Invalid price) (attempt 2)
+[2026-07-30 18:46:19]   SELL STOP L2 @ 4087.117: retcode 10006 (bad stops) (attempt 3)
+[2026-07-30 18:46:19]   SELL STOP L2 @ 4087.117: level already crossed, entered at market.
+[2026-07-30 18:46:20] Grid placed: 20 pendings + 2 market fills / 22 levels (anchor ask 4087.957 / bid 4087.717, lot 0.01)
+[2026-07-30 18:46:39] PAIR CAP: 4 locked buy/sell pairs (>= 3), P/L -16.41. Flattening & re-anchoring.
+[2026-07-30 18:46:40] All positions closed, all pendings cancelled — flat.
+[2026-07-30 18:46:40] Cycle 4 done (paircap). New balance: 87.15
+[2026-07-30 18:46:40] STATS cycle=4 outcome=paircap start=102.85 end=87.15 pnl=-15.70
+[2026-07-30 18:46:40] Waiting 30s, then re-anchoring...
+[2026-07-30 18:47:01] Bot starting.
+[2026-07-30 18:47:01] Connected: login 472305567 @ Exness-MT5Trial16 | balance 87.15 USD
+[2026-07-30 18:47:01] XAUUSDm: contract 100.0, digits 3, min lot 0.01, spread now 0.24
+[2026-07-30 18:47:01] Waiting 60s before first grid (per spec)...
+[2026-07-30 18:48:01] ===== CYCLE 1 ===== balance 87.15, target +10.46 (12%), lot/level 0.01 (straight run to L10 would earn 13.50)
+[2026-07-30 18:48:03] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4096.711 / bid 4096.471, lot 0.01)
+[2026-07-30 18:48:10] EQUITY STOP: -7.04 (<= -6.97). Flattening & re-anchoring.
+[2026-07-30 18:48:12] All positions closed, all pendings cancelled — flat.
+[2026-07-30 18:48:12] Cycle 1 done (equitystop). New balance: 79.93
+[2026-07-30 18:48:12] STATS cycle=1 outcome=equitystop start=87.15 end=79.93 pnl=-7.22
+[2026-07-30 18:48:12] Waiting 30s, then re-anchoring...
+[2026-07-30 18:48:42] ===== CYCLE 2 ===== balance 79.93, target +9.59 (12%), lot/level 0.01 (straight run to L10 would earn 13.50)
+[2026-07-30 18:48:43] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4098.1 / bid 4097.86, lot 0.01)
+[2026-07-30 18:48:54] EQUITY STOP: -7.31 (<= -6.39). Flattening & re-anchoring.
+[2026-07-30 18:48:59] All positions closed, all pendings cancelled — flat.
+[2026-07-30 18:48:59] Cycle 2 done (equitystop). New balance: 78.08
+[2026-07-30 18:48:59] STATS cycle=2 outcome=equitystop start=79.93 end=78.08 pnl=-1.85
+[2026-07-30 18:48:59] Waiting 30s, then re-anchoring...
+[2026-07-30 19:20:46] Bot starting.
+[2026-07-30 19:20:46] Connected: login 472305567 @ Exness-MT5Trial16 | balance 1278.08 USD
+[2026-07-30 19:20:46] XAUUSDm: contract 100.0, digits 3, min lot 0.01, spread now 0.24
+[2026-07-30 19:20:46] Waiting 60s before first grid (per spec)...
+[2026-07-30 19:21:46] ===== CYCLE 1 ===== balance 1278.08, basis 804.38, target +96.52 (12%), stop -64.35 (8%), step 2.15, lot/level 0.01 (straight run to L10 would earn 96.53)
+[2026-07-30 19:21:48] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4090.837 / bid 4090.597, lot 0.01)
+[2026-07-30 19:55:30] EQUITY STOP: -65.64 (<= -64.35). Flattening & re-anchoring.
+[2026-07-30 19:55:31] All positions closed, all pendings cancelled — flat.
+[2026-07-30 19:55:31] Cycle 1 done (equitystop). New balance: 1216.74
+[2026-07-30 19:55:31] STATS cycle=1 outcome=equitystop start=1278.08 end=1216.74 pnl=-61.34 step=2.15 basis=804.38 pct=-0.0763
+[2026-07-30 19:55:31] Waiting 30s, then re-anchoring...
+[2026-07-30 19:56:01] ===== CYCLE 2 ===== balance 1216.74, basis 611.25, target +73.35 (12%), stop -48.90 (8%), step 1.63, lot/level 0.01 (straight run to L10 would earn 73.35)
+[2026-07-30 19:56:02] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4100.08 / bid 4099.84, lot 0.01)
+[2026-07-30 19:56:59] Connected: login 472305567 @ Exness-MT5Trial16 | balance 1216.74 USD
+[2026-07-30 19:57:01] All positions closed, all pendings cancelled — flat.
+[2026-07-30 19:57:01] Balance after flatten: 1215.76 USD
+[2026-07-30 19:58:09] Bot starting.
+[2026-07-30 19:58:09] Connected: login 472305567 @ Exness-MT5Trial16 | balance 1215.76 USD
+[2026-07-30 19:58:09] XAUUSDm: contract 100.0, digits 3, min lot 0.01, spread now 0.24
+[2026-07-30 19:58:09] Waiting 60s before first grid (per spec)...
+[2026-07-30 19:59:09] ===== CYCLE 1 ===== balance 1215.76, basis 510.00, target +61.20 (12%), stop -40.80 (8%), step 1.36, lot/level 0.01 (straight run to L10 would earn 61.20)
+[2026-07-30 19:59:10] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4098.757 / bid 4098.517, lot 0.01)
+[2026-07-30 20:07:31] TREND PURGE: 1 longs / 4 shorts — dropping the buy side (P/L +0.91).
+[2026-07-30 20:13:17] TARGET HIT: +62.37 (>= 61.20). Closing everything.
+[2026-07-30 20:13:18] All positions closed, all pendings cancelled — flat.
+[2026-07-30 20:13:18] Cycle 1 done (target). New balance: 1277.96
+[2026-07-30 20:13:18] STATS cycle=1 outcome=target start=1215.76 end=1277.96 pnl=+62.20 step=1.36 basis=510.00 pct=+0.1220
+[2026-07-30 20:13:18] Waiting 30s, then re-anchoring...
+[2026-07-30 20:13:48] ===== CYCLE 2 ===== balance 1277.96, basis 642.75, target +77.13 (12%), stop -51.42 (8%), step 1.71, lot/level 0.01 (straight run to L10 would earn 77.13)
+[2026-07-30 20:13:49] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4084.94 / bid 4084.7, lot 0.01)
+[2026-07-30 20:16:23] TREND PURGE: 4 longs / 1 shorts — dropping the sell side (P/L +0.92).
+[2026-07-30 20:38:20] TRAIL EXIT: peak was +55.95, now +31.92. Banking.
+[2026-07-30 20:38:36] All positions closed, all pendings cancelled — flat.
+[2026-07-30 20:38:36] Cycle 2 done (trail). New balance: 1313.08
+[2026-07-30 20:38:36] STATS cycle=2 outcome=trail start=1277.96 end=1313.08 pnl=+35.12 step=1.71 basis=642.75 pct=+0.0546
+[2026-07-30 20:38:36] Waiting 30s, then re-anchoring...
+[2026-07-30 20:39:06] ===== CYCLE 3 ===== balance 1313.08, basis 445.88, target +53.51 (12%), stop -35.67 (8%), step 1.19, lot/level 0.01 (straight run to L10 would earn 53.51)
+[2026-07-30 20:39:07] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4098.663 / bid 4098.423, lot 0.01)
+[2026-07-30 20:43:14] TREND PURGE: 4 longs / 0 shorts — dropping the sell side (P/L +4.96).
+[2026-07-30 20:52:34] TRAIL EXIT: peak was +31.54, now +14.98. Banking.
+[2026-07-30 20:52:40] All positions closed, all pendings cancelled — flat.
+[2026-07-30 20:52:40] Cycle 3 done (trail). New balance: 1330.82
+[2026-07-30 20:52:40] STATS cycle=3 outcome=trail start=1313.08 end=1330.82 pnl=+17.74 step=1.19 basis=445.88 pct=+0.0398
+[2026-07-30 20:52:40] Waiting 30s, then re-anchoring...
+[2026-07-30 20:53:10] ===== CYCLE 4 ===== balance 1330.82, basis 360.00, target +43.20 (12%), stop -28.80 (8%), step 0.96, lot/level 0.01 (straight run to L10 would earn 43.20)
+[2026-07-30 20:53:11] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4105.694 / bid 4105.454, lot 0.01)
+[2026-07-30 20:55:34] TREND PURGE: 4 longs / 0 shorts — dropping the sell side (P/L +4.01).
+[2026-07-30 21:01:57] TRAIL EXIT: peak was +22.01, now +7.38. Banking.
+[2026-07-30 21:02:05] All positions closed, all pendings cancelled — flat.
+[2026-07-30 21:02:05] Cycle 4 done (trail). New balance: 1337.67
+[2026-07-30 21:02:05] STATS cycle=4 outcome=trail start=1330.82 end=1337.67 pnl=+6.85 step=0.96 basis=360.00 pct=+0.0190
+[2026-07-30 21:02:05] Waiting 30s, then re-anchoring...
+[2026-07-30 21:02:35] ===== CYCLE 5 ===== balance 1337.67, basis 388.50, target +46.62 (12%), stop -31.08 (8%), step 1.04, lot/level 0.01 (straight run to L10 would earn 46.62)
+[2026-07-30 21:02:36] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4112.567 / bid 4112.327, lot 0.01)
+[2026-07-30 21:11:10] PAIR CAP: 3 locked buy/sell pairs (>= 3), P/L -15.23. Flattening & re-anchoring.
+[2026-07-30 21:11:18] All positions closed, all pendings cancelled — flat.
+[2026-07-30 21:11:18] Cycle 5 done (paircap). New balance: 1323.10
+[2026-07-30 21:11:18] STATS cycle=5 outcome=paircap start=1337.67 end=1323.10 pnl=-14.57 step=1.04 basis=388.50 pct=-0.0375
+[2026-07-30 21:11:18] Waiting 30s, then re-anchoring...
+[2026-07-30 21:11:48] ===== CYCLE 6 ===== balance 1323.10, basis 415.12, target +49.81 (12%), stop -33.21 (8%), step 1.11, lot/level 0.01 (straight run to L10 would earn 49.81)
+[2026-07-30 21:11:49] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4110.851 / bid 4110.611, lot 0.01)
+[2026-07-30 21:13:12] TREND PURGE: 4 longs / 0 shorts — dropping the sell side (P/L +5.95).
+[2026-07-30 21:26:04] TRAIL EXIT: peak was +25.85, now +10.38. Banking.
+[2026-07-30 21:26:16] All positions closed, all pendings cancelled — flat.
+[2026-07-30 21:26:16] Cycle 6 done (trail). New balance: 1334.02
+[2026-07-30 21:26:16] STATS cycle=6 outcome=trail start=1323.10 end=1334.02 pnl=+10.92 step=1.11 basis=415.12 pct=+0.0263
+[2026-07-30 21:26:16] Waiting 30s, then re-anchoring...
+[2026-07-30 21:26:46] ===== CYCLE 7 ===== balance 1334.02, basis 454.13, target +54.50 (12%), stop -36.33 (8%), step 1.21, lot/level 0.01 (straight run to L10 would earn 54.50)
+[2026-07-30 21:26:47] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4117.436 / bid 4117.196, lot 0.01)
+[2026-07-30 21:36:55] TREND PURGE: 1 longs / 4 shorts — dropping the buy side (P/L -0.79).
+[2026-07-30 21:56:00] TRAIL EXIT: peak was +32.25, now +13.53. Banking.
+[2026-07-30 21:56:10] All positions closed, all pendings cancelled — flat.
+[2026-07-30 21:56:10] Cycle 7 done (trail). New balance: 1343.37
+[2026-07-30 21:56:10] STATS cycle=7 outcome=trail start=1334.02 end=1343.37 pnl=+9.35 step=1.21 basis=454.13 pct=+0.0206
+[2026-07-30 21:56:10] Waiting 30s, then re-anchoring...
+[2026-07-30 21:56:40] ===== CYCLE 8 ===== balance 1343.37, basis 334.12, target +40.09 (12%), stop -26.73 (8%), step 0.89, lot/level 0.01 (straight run to L10 would earn 40.09)
+[2026-07-30 21:56:41] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4109.896 / bid 4109.656, lot 0.01)
+[2026-07-30 22:14:20] TREND PURGE: 1 longs / 4 shorts — dropping the buy side (P/L -0.58).
+[2026-07-30 22:29:35] TARGET HIT: +40.35 (>= 40.09). Closing everything.
+[2026-07-30 22:29:46] All positions closed, all pendings cancelled — flat.
+[2026-07-30 22:29:46] Cycle 8 done (target). New balance: 1388.91
+[2026-07-30 22:29:46] STATS cycle=8 outcome=target start=1343.37 end=1388.91 pnl=+45.54 step=0.89 basis=334.12 pct=+0.1363
+[2026-07-30 22:29:46] Waiting 30s, then re-anchoring...
+[2026-07-30 22:30:16] ===== CYCLE 9 ===== balance 1388.91, basis 509.25, target +61.11 (12%), stop -40.74 (8%), step 1.36, lot/level 0.01 (straight run to L10 would earn 61.11)
+[2026-07-30 22:30:17] Grid placed: 22 pendings + 0 market fills / 22 levels (anchor ask 4101.269 / bid 4101.029, lot 0.01)
+[2026-07-30 22:37:12] TREND PURGE: 4 longs / 0 shorts — dropping the sell side (P/L +6.95).
