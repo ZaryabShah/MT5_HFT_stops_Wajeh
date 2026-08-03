@@ -17,7 +17,7 @@ Logs: bot.log
 """
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime
 
 import MetaTrader5 as mt5
 
@@ -48,20 +48,6 @@ def connect() -> bool:
         log(f"initialize() failed (attempt {attempt}/5): {mt5.last_error()}")
         time.sleep(3)
     return False
-
-
-def trend_ok() -> bool:
-    """v4.7 gate: last TREND_LOOKBACK_MIN closed M1 bars must show an
-    efficient AND sizeable net move (trending market)."""
-    r = mt5.copy_rates_from_pos(C.SYMBOL, mt5.TIMEFRAME_M1, 1,
-                                C.TREND_LOOKBACK_MIN + 1)
-    if r is None or len(r) < C.TREND_LOOKBACK_MIN + 1:
-        return False
-    closes = [float(b["close"]) for b in r]
-    net = abs(closes[-1] - closes[0])
-    total = sum(abs(closes[i + 1] - closes[i]) for i in range(len(closes) - 1))
-    er = net / total if total > 1e-9 else 0.0
-    return er >= C.TREND_ER_MIN and net >= C.TREND_MOVE_MIN
 
 
 def grid_step(spec) -> float:
@@ -384,51 +370,8 @@ def main():
     time.sleep(C.START_DELAY_SEC)
 
     cycle_no = 0
-    day_date = None
-    day_start_balance = 0.0
-    window_logged = False
-    trend_logged = False
     try:
         while True:
-            # v4.6 trading window: only START cycles inside TRADE_HOURS (UTC)
-            if C.TRADE_HOURS and datetime.now(timezone.utc).hour not in C.TRADE_HOURS:
-                if not window_logged:
-                    log(f"Outside trading window (UTC hours "
-                        f"{sorted(C.TRADE_HOURS)}) — waiting.")
-                    window_logged = True
-                time.sleep(60)
-                continue
-            if window_logged:
-                log("Trading window open — resuming.")
-                window_logged = False
-
-            # v4.7 trend gate: only anchor grids in measurably trending tape
-            if C.TREND_ER_MIN and not trend_ok():
-                if not trend_logged:
-                    log("TREND WAIT: last 30min not trending (ER/move below "
-                        "gate) — rechecking.")
-                    trend_logged = True
-                time.sleep(C.REGIME_WAIT_SEC)
-                continue
-            if trend_logged:
-                log("TREND OK — market moving, resuming.")
-                trend_logged = False
-
-            # v4.3 daily circuit breaker: flat for the rest of the UTC day
-            # once the day's realized P/L hits -DAILY_STOP_USD
-            if C.DAILY_STOP_USD:
-                now_day = datetime.now(timezone.utc).date()
-                acc_b = mt5.account_info()
-                if acc_b and now_day != day_date:
-                    day_date, day_start_balance = now_day, acc_b.balance
-                if acc_b and acc_b.balance - day_start_balance <= -C.DAILY_STOP_USD:
-                    log(f"DAILY BREAKER: day P/L "
-                        f"{acc_b.balance - day_start_balance:+.2f} <= "
-                        f"-{C.DAILY_STOP_USD:.0f}. Flat until next UTC day.")
-                    while datetime.now(timezone.utc).date() == day_date:
-                        time.sleep(60)
-                    continue
-
             acc = mt5.account_info()
             if acc and acc.balance < 1.0:
                 log(f"Balance {acc.balance:.2f} — too low to trade. "

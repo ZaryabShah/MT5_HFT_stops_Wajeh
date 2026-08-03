@@ -1,0 +1,143 @@
+# WajehGrid v4.7 — "Trend Gate" (final validated build)
+
+Self-contained package of the XAUUSD hedged-grid bot, exactly as validated on
+4 months of real FusionMarkets tick data (Apr 2 – Jul 31, 2026).
+
+**Backtest result @ 0.01 lots:** net **+$3,165**, max drawdown **−$404**,
+net/DD 7.8, 572 cycles, 53% wins, every one of 18 weeks' lowest point above
+start. Robust across 5 different start times. Live results will be humbler —
+expect roughly **~$185/week** as the *optimistic* benchmark.
+
+---
+
+## Files
+
+| file | purpose |
+|---|---|
+| `bot.py` | the bot — run this |
+| `config.py` | ALL settings + account credentials (edit here, never in bot.py) |
+| `close_all.py` | emergency kill switch — cancels every pending, closes every position |
+| `stats.py` | summarizes completed cycles from `bot.log` STATS lines |
+| `requirements.txt` | Python dependency (MetaTrader5) |
+
+`bot.log` is created next to `bot.py` on first run.
+
+---
+
+## Setup on a fresh machine
+
+1. **Install the MetaTrader 5 terminal** (from your broker or metatrader5.com)
+   and log it into the trading account **once manually** so the terminal knows
+   the server. Leave the terminal installed (it can be closed; the Python API
+   launches it).
+2. **Install Python 3.10+ (Windows)** — the MetaTrader5 package is
+   Windows-only.
+3. `pip install -r requirements.txt`
+4. Edit `config.py` top section: `MT5_LOGIN`, `MT5_PASSWORD`, `MT5_SERVER`,
+   `SYMBOL`.
+   - FusionMarkets demo: symbol is `XAUUSD` (this is the validated venue).
+   - Exness: symbol is `XAUUSDm` (suffix!) — and Exness spread/commission was
+     NOT what this config was tuned on. Re-validate before trusting it there.
+5. Run: `python bot.py`
+6. Stop: `Ctrl+C` stops the bot but **leaves orders/positions in place** —
+   then run `python close_all.py` to flatten. (Or just run `close_all.py` any
+   time; it only touches this bot's trades, magic 277888.)
+7. Stats any time: `python stats.py`
+
+**Recommended account: $1,000–1,200 balance per 0.01 lots.** Demo only unless
+explicitly decided otherwise.
+
+---
+
+## Strategy — every rule, in fire order
+
+**One cycle:**
+
+1. **Anchor** at current price. Place **11 buy stops above** and **11 sell
+   stops below**, evenly spaced.
+2. **Adaptive spacing:** step = 0.5 × average range of the last 5 closed
+   1-minute bars, floored at **$0.30**, capped at **$2.50** (the loose
+   crisis-cap: tight caps ≤$1.50 are poison, but uncapped April steps of $5–8
+   made single stops cost $140–220).
+3. **Lot per level:** fixed **0.01** (test mode). Target/stop are computed
+   against the "virtual basis" balance for which 0.01 is the exact spec size,
+   so behavior is identical to full sizing, only in miniature.
+4. **Orders are never re-placed mid-cycle.** A consumed side stays consumed.
+
+**While the cycle runs, checks in priority order (every 0.5 s):**
+
+1. **Profit target +12 %** of basis → close everything, wait 30 s, new cycle.
+   (12 % is sized to land exactly at the 11th/last stop on a clean run.)
+2. **Trailing exit:** once profit has reached **50 %** of target, bank if it
+   gives back **30 %** of target from the peak.
+3. **Trend purge:** if one side has ≥ **5** fills while the other has ≤ 2,
+   drop (close + cancel) the lagging side — bounce-trap protection.
+4. **Equity stop −8 %** of basis → flatten, re-anchor. (Path-risk backstop;
+   6 % gets clipped by real-feed noise.)
+5. **Pair cap:** ≥ **3** locked buy/sell pairs (chop signature) → flatten,
+   re-anchor.
+6. **All 22 stops consumed** → close everything, re-anchor.
+
+**Before a new cycle may start (all must pass):**
+
+1. **Trading window:** new cycles only **22:00–06:00 UTC** (v4.6 — London/US
+   hours whipsaw-lose, overnight trends cleanly). Open cycles always finish
+   naturally.
+2. **Trend gate (v4.7, the headline filter):** over the last **30 closed** M1
+   bars require BOTH efficiency ratio |net|/Σ|steps| ≥ **0.25** AND
+   |net move| ≥ **$3.00**. No look-ahead: the forming bar is excluded
+   (`copy_rates_from_pos` starts at position 1). Recheck every 2 min.
+3. **Daily circuit breaker:** once the UTC day's realized P/L hits
+   **−$50**, flat until the next UTC day. Load-bearing, not insurance — every
+   profitable real-feed config has it. **Calibrated to 0.01 lots — scale it
+   with lot size.**
+4. **Spread regime gate:** step must be ≥ **6×** the live spread, else sit out
+   (recheck every 2 min) — protects against quiet-tape spread drag.
+
+**Housekeeping:** 60 s wait after start; 30 s wait between cycles; startup
+flattens any leftovers from a previous run (power-cut safe); orders tagged
+magic **277888** so the bot never touches other trades; terminal glitches
+(`None` from the API) are never treated as "flat".
+
+---
+
+## Scaling up lots
+
+Everything is exactly linear in lot size. Change **two** numbers in
+`config.py`, together, plus fund the account accordingly:
+
+| `FIXED_TEST_LOT` | `DAILY_STOP_USD` | recommended balance | 4-mo backtest net / maxDD |
+|---|---|---|---|
+| 0.01 | 50  | $1,000+ | +$3,165 / −$404 |
+| 0.02 | 100 | $2,000+ | +$6,329 / −$807 |
+| 0.03 | 150 | $3,000+ | +$9,494 / −$1,211 |
+
+---
+
+## Hard-won warnings
+
+- **Validated on FusionMarkets demo only** (real tick feed, ~$0.086 avg
+  spread, $4.50/lot round-trip commission). A constant-spread model of this
+  exact strategy was off by **$7,800** vs the real feed — do not assume it
+  transfers to another broker without re-testing.
+- Real ECN feeds have **spread-spike phantom fills** (ask jumps trigger buy
+  stops with no price move). The 6×-spread gate and the $50 breaker exist
+  because of this.
+- The Exness **Real35 account is real money — read-only, never trade it**
+  without an explicit human decision.
+- Weekend: market closes Fri ~21:00 UTC, reopens Mon ~01:00 UTC. Best
+  practice: be flat over the weekend (close Friday evening manually or with
+  `close_all.py` if a cycle is open).
+- If the machine loses power mid-cycle, just restart the bot — startup
+  cleanup flattens leftovers automatically.
+
+---
+
+## Lineage (why each rule exists)
+
+v1 fixed grid → v2 adaptive step + caps → v3 purge/trail → v4 regime filter →
+v4.1 capped gap → v4.2 backtest-tuned (purge 5, trail arm 0.5) → v4.3 daily
+breaker → v4.4 crisis cap $2.50 → v4.5 real-feed retune (8 % stop, 0.3 trail,
+6× spread gate) → v4.6 overnight window 22–06 UTC → **v4.7 trend gate
+(ER ≥ 0.25 AND move ≥ $3 over 30 m)**. Full research archive lives in the
+parent repo's `versions/` folder.

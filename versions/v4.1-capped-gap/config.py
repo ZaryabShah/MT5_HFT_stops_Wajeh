@@ -1,14 +1,11 @@
 # MT5 account credentials and strategy configuration
 # NOTE: Exness-MT5Trial16 is an Exness DEMO (trial) server.
 
-# v4.5 launch target: FUSION demo (the only venue with a real-feed-validated
-# profitable config). Exness trial kept for reference:
-#   472305567 / Wajeh.277888 / Exness-MT5Trial16, symbol XAUUSDm
-MT5_LOGIN = 426190
-MT5_PASSWORD = "Kazmi@12345"
-MT5_SERVER = "FusionMarkets-Demo"
+MT5_LOGIN = 472305567
+MT5_PASSWORD = "Wajeh.277888"
+MT5_SERVER = "Exness-MT5Trial16"
 
-SYMBOL = "XAUUSD"   # Fusion gold symbol (2-digit pricing)
+SYMBOL = "XAUUSDm"  # Exness standard-account gold symbol
 
 # --- Grid geometry ---
 GRID_STEP = 0.30          # $0.30 between levels (floor when ADAPTIVE_STEP is on)
@@ -20,14 +17,9 @@ GRID_LEVELS = 11          # 11 buy stops above + 11 sell stops below
 ADAPTIVE_STEP = True
 VOL_LOOKBACK_MIN = 5      # closed M1 bars to average
 VOL_STEP_MULT = 0.5       # step = mult x avg 1-min range (floored at GRID_STEP)
-# Cap history: TIGHT caps (<=1.50) are poison — they force the grid into
-# noise (10-day sweep: cap 0.90 avg -$1,741; 4-month: cap 0.90 = -$3,371).
-# But a LOOSE crisis-cap that only trims the extremes is a win: without it,
-# April's $5-8 steps made single equity stops cost $140-220. 4-month test
-# (with $50 breaker): cap 2.50 = +$2,291 / maxDD -$984 / April POSITIVE,
-# vs no-cap +$1,861 / -$1,251 / April -$550. Robust 5/5 start times
-# (maxDD identical -983.74 in every run). v4.4, staged 08-01 late.
-GRID_STEP_MAX = 2.50
+# User 08-01: cap the placed gap — variable below the cap, never wider.
+# The regime gate still judges the RAW (uncapped) volatility number.
+GRID_STEP_MAX = 0.90
 START_DELAY_SEC = 60      # wait 1 minute after bot start before placing grid
 RESTART_DELAY_SEC = 30    # wait 30 seconds after profit-target close before restarting
 
@@ -56,54 +48,27 @@ MAX_LOCKED_PAIRS = 3
 # Equity backstop: pair cap bounds structure but not path risk (a run-then-
 # reverse builds floating loss on unpaired positions before pairs lock).
 # Flatten & re-anchor if cycle P/L <= -this fraction of cycle-start balance.
-MAX_CYCLE_LOSS_PCT = 0.08  # v4.5: REAL-feed retune — 6% gets clipped by the
-                           # noisier live feed; every profitable real-feed
-                           # cell uses 8%
-
-# v4.3 daily circuit breaker (Apr 6-17 autopsy: 158 equity stops in 2 weeks,
-# -$3,497; toxic days announce themselves early). Once the UTC day's realized
-# P/L hits -this, stop trading until the next UTC day. 4-month backtest:
-# doubles net, cuts maxDD 70%; robust 5/5 start times. Value is calibrated to
-# 0.01 test lots — rescale if lots ever change.
-# v4.5: breaker back ON — the real-feed data ended the debate: ALL 10
-# profitable real-feed configs have it; no-breaker lost $2.8-5.5k on the
-# real feed. It is load-bearing, not insurance.
-DAILY_STOP_USD = 50.0
+MAX_CYCLE_LOSS_PCT = 0.08
 
 # --- Regime filter (added 2026-07-31 ~04:15 after overnight chop bleed:
 # Asian session shrank step to ~$0.65 where the $0.24 spread is a 37% drag and
 # 4-fill "trends" are noise — 4 of 5 cycles lost). Sit out while the adaptive
 # step is under this multiple of the live spread; recheck periodically.
-# v4.7 trend gate (user's idea: classify movement first, trade only when
-# trending). At cycle start, over the last 30 closed M1 bars require BOTH:
-#   efficiency ratio |net|/sum|steps| >= 0.25  AND  |net move| >= $3.00
-# Real-feed 4mo: +$3,165 / maxDD -$404 vs v4.6's +$1,857 / -$808.
-# Robust: ER and move gates each 5/5 start times (4 byte-identical).
-TREND_LOOKBACK_MIN = 30
-TREND_ER_MIN = 0.25
-TREND_MOVE_MIN = 3.0
-
-# v4.6: trade ONLY 22:00-06:00 UTC (new cycles; open cycles finish naturally).
-# Real-feed session study: London/US hours LOSE (-$1,293 standalone; whipsaw
-# vol), overnight hours trend cleanly. 22-06 beats all-hours on every metric:
-# +$1,857 vs +$1,507, maxDD -$808 vs -$1,195, 52% wins, robust 5/5 starts.
-TRADE_HOURS = {22, 23, 0, 1, 2, 3, 4, 5}
-
-MIN_STEP_SPREAD_MULT = 6.0  # v4.5: stricter gate — on the variable real feed,
-                            # quote-triggered stops need calmer-spread regimes
-REGIME_WAIT_SEC = 120     # recheck the gate every 2 min
+MIN_STEP_SPREAD_MULT = 4.0
+REGIME_WAIT_SEC = 120     # user 08-01: recheck the gate every 2 min, not 10
 # Shadow mode (2026-07-31, user request): do NOT block trading; tag each cycle
 # with the filter's would-be verdict instead, so stats.py can compare
 # "v3 actual (all cycles)" vs "v4 simulated (only verdict=trade cycles)".
-REGIME_SHADOW_MODE = False  # v4.2: gate ENFORCING — helps in live shadow test
-                            # (+$67 vs -$44) AND in the 10-day sweep (gate-on
-                            # beats gate-off on average across all 216 pairs).
+REGIME_SHADOW_MODE = True   # user 08-01: back to trade-everything (v3 logic)
+                            # with the new GRID_STEP_MAX cap; verdicts still
+                            # tagged so the gate question re-tests under the cap.
+                            # (Uncapped 07-31 test: skips went 4W/9L, -$111.)
 
 # --- Trend protection (from cycle analysis 2026-07-30 19:55: a 10-level run
 # peaked at +$75 net but one counter-side hedge cost $24.51 — the exact margin
 # by which the target was missed — then the reversal rode to the -8% stop) ---
-PURGE_OPPOSITE_AT = 5     # v4.2: 5 beats 4 in sweep (bounce-trap protection)
+PURGE_OPPOSITE_AT = 4     # one side >= this many fills (other <= 2): close/cancel other side
 TRAIL_ARM_FRAC = 0.5      # arm trailing once net profit >= this frac of target
-TRAIL_GIVEBACK_FRAC = 0.3 # v4.5: real-feed retune prefers the tighter trail
+TRAIL_GIVEBACK_FRAC = 0.3 # then exit if profit falls this frac of target below peak
 
 MAGIC = 277888            # order tag so the bot only touches its own trades
