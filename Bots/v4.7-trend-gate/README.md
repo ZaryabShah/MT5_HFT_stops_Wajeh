@@ -80,9 +80,11 @@ explicitly decided otherwise.
 
 **Before a new cycle may start (all must pass):**
 
-1. **Trading window:** new cycles only **22:00–06:00 UTC** (v4.6 — London/US
-   hours whipsaw-lose, overnight trends cleanly). Open cycles always finish
-   naturally.
+1. **Trading window:** new cycles only **22:00–06:00 broker-SERVER time**
+   (v4.6 — London/US hours whipsaw-lose, overnight trends cleanly). NOTE:
+   these are server hours (GMT+3 in US summer), the tick-timestamp basis of
+   the backtests, not real UTC — bot.py reads them from tick time. Open
+   cycles always finish naturally.
 2. **Trend gate (v4.7, the headline filter):** over the last **30 closed** M1
    bars require BOTH efficiency ratio |net|/Σ|steps| ≥ **0.25** AND
    |net move| ≥ **$3.00**. No look-ahead: the forming bar is excluded
@@ -125,9 +127,9 @@ Everything is exactly linear in lot size. Change **two** numbers in
   because of this.
 - The Exness **Real35 account is real money — read-only, never trade it**
   without an explicit human decision.
-- Weekend: market closes Fri ~21:00 UTC, reopens Mon ~01:00 UTC. Best
-  practice: be flat over the weekend (close Friday evening manually or with
-  `close_all.py` if a cycle is open).
+- Weekend: market closes Friday 21:00 real UTC (= Saturday 00:00 server) and
+  reopens Monday 01:00 server time. Best practice: be flat over the weekend
+  (close Friday evening manually or with `close_all.py` if a cycle is open).
 - If the machine loses power mid-cycle, just restart the bot — startup
   cleanup flattens leftovers automatically.
 

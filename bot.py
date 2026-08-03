@@ -50,6 +50,18 @@ def connect() -> bool:
     return False
 
 
+def server_time():
+    """Broker-server clock, read from the last tick — the timestamp basis every
+    backtest uses (GMT+3 'NY-close' servers in US summer), NOT machine UTC.
+    Freezes at the last traded second when the market closes, which keeps
+    closed-market hours outside every trading window automatically (daily
+    break, weekends, holidays). Returns None on terminal glitch."""
+    tick = mt5.symbol_info_tick(C.SYMBOL)
+    if tick is None or not tick.time:
+        return None
+    return datetime.fromtimestamp(tick.time, tz=timezone.utc)
+
+
 def trend_ok() -> bool:
     """v4.7 gate: last TREND_LOOKBACK_MIN closed M1 bars must show an
     efficient AND sizeable net move (trending market)."""
@@ -390,14 +402,18 @@ def main():
     trend_logged = False
     try:
         while True:
-            # v4.6 trading window: only START cycles inside TRADE_HOURS (UTC)
-            if C.TRADE_HOURS and datetime.now(timezone.utc).hour not in C.TRADE_HOURS:
-                if not window_logged:
-                    log(f"Outside trading window (UTC hours "
-                        f"{sorted(C.TRADE_HOURS)}) — waiting.")
-                    window_logged = True
-                time.sleep(60)
-                continue
+            # v4.6/v4.8 trading window: only START cycles inside TRADE_HOURS.
+            # SERVER hours (tick-time basis, identical to the backtests) —
+            # comparing against machine UTC would shift the window 3 hours.
+            if C.TRADE_HOURS:
+                snow = server_time()
+                if snow is None or snow.hour not in C.TRADE_HOURS:
+                    if not window_logged:
+                        log(f"Outside trading window (server hours "
+                            f"{sorted(C.TRADE_HOURS)}) — waiting.")
+                        window_logged = True
+                    time.sleep(60)
+                    continue
             if window_logged:
                 log("Trading window open — resuming.")
                 window_logged = False
@@ -414,19 +430,26 @@ def main():
                 log("TREND OK — market moving, resuming.")
                 trend_logged = False
 
-            # v4.3 daily circuit breaker: flat for the rest of the UTC day
-            # once the day's realized P/L hits -DAILY_STOP_USD
+            # v4.3 daily circuit breaker: flat for the rest of the SERVER day
+            # (00:00 server = the daily break = the natural trading-day
+            # boundary, matching the backtest) once realized P/L hits the cap
             if C.DAILY_STOP_USD:
-                now_day = datetime.now(timezone.utc).date()
+                snow = server_time()
                 acc_b = mt5.account_info()
-                if acc_b and now_day != day_date:
-                    day_date, day_start_balance = now_day, acc_b.balance
-                if acc_b and acc_b.balance - day_start_balance <= -C.DAILY_STOP_USD:
+                if snow is None or acc_b is None:
+                    time.sleep(5)
+                    continue
+                if snow.date() != day_date:
+                    day_date, day_start_balance = snow.date(), acc_b.balance
+                if acc_b.balance - day_start_balance <= -C.DAILY_STOP_USD:
                     log(f"DAILY BREAKER: day P/L "
                         f"{acc_b.balance - day_start_balance:+.2f} <= "
-                        f"-{C.DAILY_STOP_USD:.0f}. Flat until next UTC day.")
-                    while datetime.now(timezone.utc).date() == day_date:
+                        f"-{C.DAILY_STOP_USD:.0f}. Flat until next server day.")
+                    while True:
                         time.sleep(60)
+                        sn = server_time()
+                        if sn is not None and sn.date() != day_date:
+                            break
                     continue
 
             acc = mt5.account_info()

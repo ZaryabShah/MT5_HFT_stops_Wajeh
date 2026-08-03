@@ -1,15 +1,24 @@
-# v4.8 — composite trading window 20-22 U 00-06 UTC — LAUNCH CONFIG
+# v4.8 — composite trading window 20-22 U 00-06 SERVER time — LAUNCH CONFIG
 
 Product of the 08-03 variation sweep (user request: "check many variations —
 targets, hours, compounding"). ~90 backtests, one survivor.
 
+**Time basis:** all hours here are BROKER-SERVER hours (tick-timestamp basis,
+GMT+3 in US summer) — real UTC equivalent (summer): 17-19 & 21-03, i.e. NY
+1-3pm & 5-11pm. Wajeh's "doesn't the market close at 21 UTC?" question
+exposed that bot.py compared TRADE_HOURS against machine UTC — a 3-hour
+shift from the validated window. Fixed same day: bot.py server_time() reads
+the clock from tick.time (also auto-idles the bot through the daily break,
+weekends and holidays, since tick time freezes at close).
+
 ## The change
 `TRADE_HOURS = {20, 21, 0, 1, 2, 3, 4, 5}` (was 22-06). The 24-cell hour
 sweep showed the old window contained a dead zone and excluded a live one:
-- 20-22 UTC standalone: **+$1,181** (net/DD 2.8) — was excluded
-- 22-00 UTC standalone: **+$194** (~nothing) — was included; 23 UTC is the
-  rollover hour with the day's widest spread ($0.118). Re-adding hour 23 to
-  the new window costs −$1,352 on its own.
+- server 20-22 standalone: **+$1,181** (net/DD 2.8) — was excluded
+- server 22-00 standalone: **+$194** (~nothing) — was included; server 23 is
+  the last hour before the 5pm-NY close, the day's widest spread ($0.118).
+  Re-adding hour 23 to the new window costs −$1,352 on its own.
+- server hour 0 = the daily break (zero ticks) — vacuous in the set.
 
 ## Evidence (real Fusion feed, 4 months, 0.01 lots)
 | | v4.7 (22-06) | **v4.8 (20-22 U 00-06)** |

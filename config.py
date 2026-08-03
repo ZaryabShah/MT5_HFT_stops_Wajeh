@@ -83,13 +83,17 @@ TREND_LOOKBACK_MIN = 30
 TREND_ER_MIN = 0.25
 TREND_MOVE_MIN = 3.0
 
-# v4.6: trade ONLY overnight UTC (new cycles; open cycles finish naturally) —
-# London/US hours LOSE even trend-gated (every 06-20 window negative).
-# v4.8 (08-03): composite window 20-22 U 00-06. The 24-cell hour sweep showed
-# 20-22 strongly positive (+$1,181 standalone) while 22-00 is dead (+$194;
-# the 23 UTC rollover spread $0.118 is toxic — re-adding hour 23 alone costs
-# -$1,352). Real-feed 4mo: +$3,872 / maxDD -$504 vs v4.7's +$3,165 / -$404.
-# Robust: beats v4.7 on ALL 5 start offsets AND both IS/OOS halves.
+# IMPORTANT: hours are BROKER-SERVER hours (the tick-timestamp basis of every
+# backtest; GMT+3 "NY-close" servers during US summer), NOT real UTC — bot.py
+# reads the clock from tick.time so live matches the backtests exactly and
+# stays aligned when US DST shifts the server offset.
+# v4.8 (08-03): composite window, server 20-22 U 00-06 (= real UTC 17-19 &
+# 21-03 in summer; NY 1-3pm & 5-11pm). Hour sweep: server 20-22 strongly
+# positive (+$1,181 standalone), server 22-00 dead (+$194; hour 23 = last
+# hour before the 5pm-NY close, spread $0.118 — re-adding it alone costs
+# -$1,352); server hour 0 = the daily break, no ticks. Real-feed 4mo:
+# +$3,872 / maxDD -$504 vs v4.7's +$3,165 / -$404. Robust: beats v4.7 on
+# ALL 5 start offsets AND both IS/OOS halves.
 TRADE_HOURS = {20, 21, 0, 1, 2, 3, 4, 5}
 
 MIN_STEP_SPREAD_MULT = 6.0  # v4.5: stricter gate — on the variable real feed,

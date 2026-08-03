@@ -1,13 +1,22 @@
 # WajehGrid v4.8 — "Composite Window" (current validated build)
 
 Self-contained package of the XAUUSD hedged-grid bot. v4.8 = v4.7 with ONE
-change: the trading window is now the composite **20–22 ∪ 00–06 UTC**
-(`TRADE_HOURS = {20, 21, 0, 1, 2, 3, 4, 5}`) instead of 22–06.
+change: the trading window is now the composite **20–22 ∪ 00–06 broker-server
+time** (`TRADE_HOURS = {20, 21, 0, 1, 2, 3, 4, 5}`) instead of 22–06.
 
-Why: a 24-cell hour sweep on the real feed showed 20–22 UTC is strongly
-profitable on its own (+$1,181) while 22–00 earns nothing (+$194 — the 23:00
-UTC rollover hour has the day's widest spread, $0.118, and re-adding that one
-hour costs −$1,352). So the window swaps dead hours for live ones.
+**Time basis (important):** all hours are BROKER-SERVER hours — the timestamp
+basis of the tick data every backtest ran on (GMT+3 "NY-close" MT5 servers
+during US summer), NOT real UTC. In real UTC (summer) the window is 17–19 &
+21–03, i.e. New York 1–3 pm and 5–11 pm. The bot reads the clock from tick
+timestamps (`server_time()` in bot.py), so live behavior matches the
+backtests exactly and survives US DST shifts. Server midnight = the daily
+21:00-UTC break, so "hour 0" never actually trades.
+
+Why the change: a 24-cell hour sweep on the real feed showed server 20–22 is
+strongly profitable on its own (+$1,181) while server 22–00 earns nothing
+(+$194 — server hour 23 is the last hour before the 5 pm NY close, the day's
+widest spread at $0.118; re-adding that one hour costs −$1,352). So the
+window swaps dead hours for live ones.
 
 **Backtest (real FusionMarkets ticks, Apr 2 – Jul 31 2026, 0.01 lots):**
 net **+$3,872**, max drawdown **−$504**, net/DD 7.7, 607 cycles, 54% wins —
@@ -90,9 +99,10 @@ explicitly decided otherwise.
 
 **Before a new cycle may start (all must pass):**
 
-1. **Trading window (v4.8):** new cycles only at UTC hours
-   **20, 21, 00, 01, 02, 03, 04, 05** — the profitable overnight band minus
-   the dead 22–00 gap. Open cycles always finish naturally.
+1. **Trading window (v4.8):** new cycles only at broker-SERVER hours
+   **20, 21, 00, 01, 02, 03, 04, 05** (read from tick time, not machine UTC)
+   — the profitable band minus the dead server-22–00 gap. Open cycles always
+   finish naturally.
 2. **Trend gate (v4.7):** over the last **30 closed** M1 bars require BOTH
    efficiency ratio |net|/Σ|steps| ≥ **0.25** AND |net move| ≥ **$3.00**.
    No look-ahead: the forming bar is excluded. Recheck every 2 min.
@@ -141,8 +151,10 @@ drawdown — never use it.
   because of this.
 - The Exness **Real35 account is real money — read-only, never trade it**
   without an explicit human decision.
-- Weekend: market closes Fri ~21:00 UTC, reopens Mon ~01:00 UTC. Best
-  practice: be flat over the weekend (`close_all.py` if a cycle is open).
+- Weekend: market closes Friday 21:00 real UTC (= Saturday 00:00 server) and
+  reopens Monday 01:00 server time. Best practice: be flat over the weekend
+  (`close_all.py` if a cycle is open). The bot idles through closes on its
+  own — tick time freezes, which parks it outside the window.
 - If the machine loses power mid-cycle, just restart the bot — startup
   cleanup flattens leftovers automatically.
 
@@ -153,6 +165,8 @@ drawdown — never use it.
 v1 fixed grid → v2 adaptive step + caps → v3 purge/trail → v4 regime filter →
 v4.1 capped gap → v4.2 backtest-tuned (purge 5, trail arm 0.5) → v4.3 daily
 breaker → v4.4 crisis cap $2.50 → v4.5 real-feed retune (8 % stop, 0.3 trail,
-6× spread gate) → v4.6 overnight window 22–06 UTC → v4.7 trend gate
+6× spread gate) → v4.6 overnight window 22–06 → v4.7 trend gate
 (ER ≥ 0.25 AND move ≥ $3 over 30 m) → **v4.8 composite window 20–22 ∪ 00–06
-UTC**. Full research archive lives in the parent repo's `versions/` folder.
+server time + server-clock fix** (the bot previously compared the window to
+machine UTC — a 3-hour shift from the validated hours; caught 08-03 before
+launch). Full research archive lives in the parent repo's `versions/` folder.
