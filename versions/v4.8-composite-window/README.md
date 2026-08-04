@@ -4,8 +4,9 @@ Product of the 08-03 variation sweep (user request: "check many variations —
 targets, hours, compounding"). ~90 backtests, one survivor.
 
 **Time basis:** all hours here are BROKER-SERVER hours (tick-timestamp basis,
-GMT+3 in US summer) — real UTC equivalent (summer): 17-19 & 21-03, i.e. NY
-1-3pm & 5-11pm. Wajeh's "doesn't the market close at 21 UTC?" question
+GMT+3 in US summer) — real UTC equivalent (summer): 17-19 & effectively
+22-03 (NY 1-3pm & 6-11pm; the nominal first hour, 21-22 UTC = server 0, is
+the daily break and never trades). Wajeh's "doesn't the market close at 21 UTC?" question
 exposed that bot.py compared TRADE_HOURS against machine UTC — a 3-hour
 shift from the validated window. Fixed same day: bot.py server_time() reads
 the clock from tick.time (also auto-idles the bot through the daily break,

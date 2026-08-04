@@ -46,6 +46,9 @@ DEFAULT = dict(
                               # spread-spike phantom fills; pays half-spread
     hours=None,               # set of allowed UTC hours for cycle STARTS
                               # (None = trade around the clock)
+    last_stop_close=True,     # False: do NOT close when the last stop fills —
+                              # ride on until target/trail/SL (spec-deviation
+                              # test; live spec says close at last stop)
     gate_series=None,         # optional bool array aligned to secs: cycle may
 )                             # only START where True (regime classifiers)
 
@@ -207,7 +210,8 @@ def run(cfg, secs, rng, t_from=None, t_to=None):
                 elif outcome is None and cfg["pair_cap"] and \
                         min(len(longs), len(shorts)) >= cfg["pair_cap"]:
                     outcome = "paircap"
-                elif outcome is None and not buys and not sells and (longs or shorts):
+                elif outcome is None and cfg.get("last_stop_close", True) and \
+                        not buys and not sells and (longs or shorts):
                     outcome = "all_filled"
             if outcome:
                 pnl = realized \

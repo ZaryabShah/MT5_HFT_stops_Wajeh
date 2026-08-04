@@ -17,7 +17,7 @@ Logs: bot.log
 """
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import MetaTrader5 as mt5
 
@@ -60,6 +60,22 @@ def server_time():
     if tick is None or not tick.time:
         return None
     return datetime.fromtimestamp(tick.time, tz=timezone.utc)
+
+
+def day_realized(snow):
+    """Realized P/L (incl. commission/swap) of OUR deals so far this SERVER
+    day, from the broker's deal history. Lets the daily breaker survive bot
+    restarts (power cuts): without this, a restart re-baselines from the
+    already-reduced balance and silently re-arms a fresh daily allowance.
+    Returns None on terminal glitch (caller must not trade on unknown state)."""
+    day0 = datetime(snow.year, snow.month, snow.day, tzinfo=timezone.utc)
+    deals = mt5.history_deals_get(day0 - timedelta(days=3),
+                                  snow + timedelta(days=2))
+    if deals is None:
+        return None
+    t0 = int(day0.timestamp())
+    return sum(d.profit + d.commission + d.swap for d in deals
+               if d.magic == C.MAGIC and d.time >= t0)
 
 
 def trend_ok() -> bool:
@@ -440,7 +456,16 @@ def main():
                     time.sleep(5)
                     continue
                 if snow.date() != day_date:
-                    day_date, day_start_balance = snow.date(), acc_b.balance
+                    pnl_today = day_realized(snow)
+                    if pnl_today is None:
+                        time.sleep(5)
+                        continue
+                    day_date = snow.date()
+                    day_start_balance = acc_b.balance - pnl_today
+                    if abs(pnl_today) > 0.005:
+                        log(f"Day baseline recovered from deal history: "
+                            f"already {pnl_today:+.2f} realized this server "
+                            f"day (baseline {day_start_balance:.2f}).")
                 if acc_b.balance - day_start_balance <= -C.DAILY_STOP_USD:
                     log(f"DAILY BREAKER: day P/L "
                         f"{acc_b.balance - day_start_balance:+.2f} <= "

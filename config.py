@@ -87,8 +87,10 @@ TREND_MOVE_MIN = 3.0
 # backtest; GMT+3 "NY-close" servers during US summer), NOT real UTC — bot.py
 # reads the clock from tick.time so live matches the backtests exactly and
 # stays aligned when US DST shifts the server offset.
-# v4.8 (08-03): composite window, server 20-22 U 00-06 (= real UTC 17-19 &
-# 21-03 in summer; NY 1-3pm & 5-11pm). Hour sweep: server 20-22 strongly
+# v4.8 (08-03): composite window, server 20-22 U 00-06. Real-UTC equivalent
+# (summer): 17-19 & EFFECTIVELY 22-03 (NY 1-3pm & 6-11pm) — server hour 0 is
+# the 21-22 UTC daily break (zero ticks ever), so it sits in the set
+# vacuously and can never start a cycle. Hour sweep: server 20-22 strongly
 # positive (+$1,181 standalone), server 22-00 dead (+$194; hour 23 = last
 # hour before the 5pm-NY close, spread $0.118 — re-adding it alone costs
 # -$1,352); server hour 0 = the daily break, no ticks. Real-feed 4mo:

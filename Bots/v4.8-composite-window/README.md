@@ -7,7 +7,9 @@ time** (`TRADE_HOURS = {20, 21, 0, 1, 2, 3, 4, 5}`) instead of 22–06.
 **Time basis (important):** all hours are BROKER-SERVER hours — the timestamp
 basis of the tick data every backtest ran on (GMT+3 "NY-close" MT5 servers
 during US summer), NOT real UTC. In real UTC (summer) the window is 17–19 &
-21–03, i.e. New York 1–3 pm and 5–11 pm. The bot reads the clock from tick
+effectively 22–03, i.e. New York 1–3 pm and 6–11 pm — the 21–22 UTC hour
+inside the nominal range is the daily break (server hour 0, which never has
+ticks, so it can never start a cycle). The bot reads the clock from tick
 timestamps (`server_time()` in bot.py), so live behavior matches the
 backtests exactly and survives US DST shifts. Server midnight = the daily
 21:00-UTC break, so "hour 0" never actually trades.
