@@ -114,7 +114,9 @@ explicitly decided otherwise.
 4. **Spread regime gate:** step must be ≥ **6×** the live spread, else sit out
    (recheck every 2 min).
 
-**Housekeeping:** 60 s wait after start; 30 s wait between cycles; startup
+**Housekeeping:** 60 s wait after start; 5 s wait between cycles (08-05: was
+30 s — re-anchoring fast after a close rides trend continuation; +$4,374 /
+−$341 vs +$3,872 / −$504 at 30 s, robust across offsets and halves); startup
 flattens any leftovers from a previous run (power-cut safe); orders tagged
 magic **277888** so the bot never touches other trades; terminal glitches
 (`None` from the API) are never treated as "flat".

@@ -93,13 +93,25 @@ def trend_ok() -> bool:
 
 
 def grid_step(spec) -> float:
-    """Grid spacing for this cycle: fixed, or scaled to recent 1-min volatility."""
+    """Grid spacing for this cycle: fixed, or scaled to recent 1-min volatility.
+
+    MUST match the backtest's window semantics: average only bars from the
+    last VOL_LOOKBACK_MIN CLOCK minutes. MT5's "last N bars" skips gaps, so
+    at the daily-break/weekend reopen it reaches across into the quiet
+    pre-close tape and misprices the step (found 08-06: live $1.35 vs sim
+    $2.43 at the reopen anchor = the -$100 divergence night). Break minutes
+    simply drop out, exactly like the backtest's rng-dict lookup."""
     if not C.ADAPTIVE_STEP:
         return C.GRID_STEP
     rates = mt5.copy_rates_from_pos(C.SYMBOL, mt5.TIMEFRAME_M1, 1, C.VOL_LOOKBACK_MIN)
-    if rates is None or len(rates) == 0:
+    snow = server_time()
+    if rates is None or len(rates) == 0 or snow is None:
         return C.GRID_STEP
-    avg_range = sum(float(r["high"] - r["low"]) for r in rates) / len(rates)
+    cutoff = (int(snow.timestamp()) // 60 - C.VOL_LOOKBACK_MIN) * 60
+    vals = [float(r["high"] - r["low"]) for r in rates if r["time"] >= cutoff]
+    if not vals:
+        return C.GRID_STEP
+    avg_range = sum(vals) / len(vals)
     return max(C.GRID_STEP, round(C.VOL_STEP_MULT * avg_range, spec.digits))
 
 
@@ -428,8 +440,8 @@ def main():
                         log(f"Outside trading window (server hours "
                             f"{sorted(C.TRADE_HOURS)}) — waiting.")
                         window_logged = True
-                    time.sleep(60)
-                    continue
+                    time.sleep(5)   # fast recheck: a late anchor at window
+                    continue        # open costs edge (cadence test 08-05)
             if window_logged:
                 log("Trading window open — resuming.")
                 window_logged = False

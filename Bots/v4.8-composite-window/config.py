@@ -29,7 +29,16 @@ VOL_STEP_MULT = 0.5       # step = mult x avg 1-min range (floored at GRID_STEP)
 # (maxDD identical -983.74 in every run). v4.4, staged 08-01 late.
 GRID_STEP_MAX = 2.50
 START_DELAY_SEC = 60      # wait 1 minute after bot start before placing grid
-RESTART_DELAY_SEC = 30    # wait 30 seconds after profit-target close before restarting
+RESTART_DELAY_SEC = 5     # pause between cycle close and re-anchor (was 30,
+                          # the original spec). 08-05 sweep: profitable closes
+                          # happen mid-trend; re-anchoring in ~5s rides the
+                          # continuation, waiting 30s+ re-anchors at worse,
+                          # more extended prices. gap5: +$4,374/-$341 vs gap30
+                          # +$3,872/-$504; wins 5/5 start offsets; Jun-Jul half
+                          # +$592 better, Apr-May half net-tie w/ better DD;
+                          # maxDD improved in all 7 robustness comparisons.
+                          # Chop protection is the trend/spread gates, not
+                          # this pause. 60s+ gaps bleed badly (-$900 @120s).
 
 # --- Test mode ---
 # Trade this fixed lot regardless of balance (None = size from balance).
@@ -100,7 +109,13 @@ TRADE_HOURS = {20, 21, 0, 1, 2, 3, 4, 5}
 
 MIN_STEP_SPREAD_MULT = 6.0  # v4.5: stricter gate — on the variable real feed,
                             # quote-triggered stops need calmer-spread regimes
-REGIME_WAIT_SEC = 120     # recheck the gate every 2 min
+REGIME_WAIT_SEC = 2       # recheck the gates every 2 SECONDS (was 120).
+                          # Cadence test 08-05: the validated +$3,872 backtest
+                          # anchors at the exact first qualifying second;
+                          # modeling lazy polling costs ~half the edge
+                          # (120s-polling replay: +$1,840 / maxDD -$605).
+                          # The gate fires at trend STARTS — anchoring minutes
+                          # late buys worse prices exactly when it matters.
 # Shadow mode (2026-07-31, user request): do NOT block trading; tag each cycle
 # with the filter's would-be verdict instead, so stats.py can compare
 # "v3 actual (all cycles)" vs "v4 simulated (only verdict=trade cycles)".

@@ -35,7 +35,10 @@ DEFAULT = dict(
     step_floor=0.30,
     step_cap=0.90,
     regime_mult=None,         # None = trade everything; e.g. 4.0 = v4 gate
-    respawn_gap=30,           # seconds between cycles
+    respawn_gap=5,            # seconds between cycles (08-05: was 30; the
+                              # 0-15s band beats 30s on net AND maxDD, 60s+
+                              # bleeds — see respawn_test.py/respawn_robust.py.
+                              # Pre-08-05 scripts implicitly ran 30.)
     commission_per_lot_side=0.0,
     contract=100.0,
     max_spread=0.35,          # skip cycle starts when spread is abnormal
@@ -49,6 +52,16 @@ DEFAULT = dict(
     last_stop_close=True,     # False: do NOT close when the last stop fills —
                               # ride on until target/trail/SL (spec-deviation
                               # test; live spec says close at last stop)
+    recheck_sec=None,         # model the LIVE bot's polling cadence: after a
+                              # failed gate check, next check only recheck_sec
+                              # later (live REGIME_WAIT_SEC=120). None = anchor
+                              # at the exact first qualifying second (ideal)
+    digits=3,                 # price rounding for grid levels / step (3 fits
+                              # gold & JPY; EURUSD needs 5, BTC 2)
+    step_ema=None,            # slow step adaptation: step = a*raw + (1-a)*prev
+                              # (a=0.5 ~ 2-cycle memory, 0.33 ~ 3-cycle)
+    step_confirm=None,        # (n, frac): keep current step until raw deviates
+                              # > frac for n consecutive cycle starts
     gate_series=None,         # optional bool array aligned to secs: cycle may
 )                             # only START where True (regime classifiers)
 
@@ -102,7 +115,7 @@ def adaptive_step(rng, t, cfg):
     step = max(cfg["step_floor"], step)
     if cfg["step_cap"]:
         step = min(step, cfg["step_cap"])
-    return round(step, 3)
+    return round(step, cfg.get("digits", 3))
 
 
 def raw_step(rng, t, cfg):
@@ -129,35 +142,58 @@ def run(cfg, secs, rng, t_from=None, t_to=None):
 
     i = lo
     idle_until = 0
+    cur_step = None
+    confirm = 0
     while i < hi:
         ts = t[i]
         if ts < idle_until:
             i += 1
             continue
+        R = cfg.get("recheck_sec")
         if cfg.get("hours") is not None and int(ts // 3600) % 24 not in cfg["hours"]:
-            i += 1
+            i = np.searchsorted(t, ts + R) if R else i + 1
             continue
         if cfg.get("gate_series") is not None and not cfg["gate_series"][i]:
-            i += 1
+            i = np.searchsorted(t, ts + R) if R else i + 1
             continue
         spread = secs["ask_c"][i] - secs["bid_c"][i]
         if cfg["max_spread"] and spread > cfg["max_spread"]:
-            i += 1
+            i = np.searchsorted(t, ts + R) if R else i + 1
             continue
         # regime gate (v4) — optional
         if cfg["regime_mult"]:
             if raw_step(rng, ts, cfg) < cfg["regime_mult"] * spread:
-                i += 1
+                i = np.searchsorted(t, ts + R) if R else i + 1
                 continue
         # ---- start cycle ----
-        step = adaptive_step(rng, ts, cfg)
+        raw_c = adaptive_step(rng, ts, cfg)
+        if cfg.get("step_ema") and cur_step is not None:
+            a = cfg["step_ema"]
+            step = round(a * raw_c + (1 - a) * cur_step, cfg.get("digits", 3))
+            step = max(cfg["step_floor"], step)
+            if cfg["step_cap"]:
+                step = min(step, cfg["step_cap"])
+            cur_step = step
+        elif cfg.get("step_confirm") and cur_step is not None:
+            n_conf, frac = cfg["step_confirm"]
+            if abs(raw_c - cur_step) > frac * cur_step:
+                confirm += 1
+                if confirm >= n_conf:
+                    cur_step, confirm = raw_c, 0
+            else:
+                confirm = 0
+            step = cur_step
+        else:
+            step = cur_step = raw_c
+            confirm = 0
         n = cfg["target_level"]
         basis = lot * C_ * step * n * (n - 1) / 2 / cfg["target_pct"]
         target = basis * cfg["target_pct"]
         maxloss = basis * cfg["sl_pct"]
         anchor_a, anchor_b = secs["ask_c"][i], secs["bid_c"][i]
-        buys = [round(anchor_a + k * step, 3) for k in range(1, cfg["levels"] + 1)]
-        sells = [round(anchor_b - k * step, 3) for k in range(1, cfg["levels"] + 1)]
+        dg = cfg.get("digits", 3)
+        buys = [round(anchor_a + k * step, dg) for k in range(1, cfg["levels"] + 1)]
+        sells = [round(anchor_b - k * step, dg) for k in range(1, cfg["levels"] + 1)]
         longs, shorts = [], []          # entry prices
         realized = 0.0
         purged = False
