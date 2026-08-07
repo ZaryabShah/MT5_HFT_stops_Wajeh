@@ -26,6 +26,7 @@ import config as C
 LOG_FILE = "bot.log"
 POLL_SEC = 0.5          # equity check interval
 DEVIATION = 100         # max slippage (points) on market close orders
+EXIT_DETECT_TS = [0.0]  # when the exit decision fired (respawn timer anchor)
 
 
 # ----------------------------------------------------------------------------
@@ -342,7 +343,8 @@ def run_cycle(cycle_no: int, spec) -> str:
             continue                    # terminal glitch — never act on unknown state
 
         def end_cycle(outcome: str) -> str:
-            close_all()
+            EXIT_DETECT_TS[0] = time.time()   # respawn counts from the DECISION,
+            close_all()                       # not from the last close ack
             a = mt5.account_info()
             pnl = a.balance - start_balance
             log(f"Cycle {cycle_no} done ({outcome}). New balance: {a.balance:.2f}")
@@ -514,8 +516,15 @@ def main():
             cycle_no += 1
             outcome = run_cycle(cycle_no, spec)
             if outcome in ("target", "trail", "paircap", "equitystop", "all_filled"):
-                log(f"Waiting {C.RESTART_DELAY_SEC}s, then re-anchoring...")
-                time.sleep(C.RESTART_DELAY_SEC)
+                elapsed = time.time() - EXIT_DETECT_TS[0]
+                wait = max(0.0, C.RESTART_DELAY_SEC - elapsed)
+                log(f"Waiting {wait:.1f}s (respawn timer backdated to exit "
+                    f"detection, closes took {elapsed:.1f}s), then re-anchoring...")
+                time.sleep(wait)
+                if my_positions() or my_orders():
+                    log("Leftovers found after close — flattening again "
+                        "before re-anchor (never stack).")
+                    close_all()
                 continue
             if outcome == "stopout":
                 log("Account stopped out — bot stops. Top up the demo, then restart.")

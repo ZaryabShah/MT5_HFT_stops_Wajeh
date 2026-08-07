@@ -60,6 +60,12 @@ DEFAULT = dict(
                               # gold & JPY; EURUSD needs 5, BTC 2)
     step_ema=None,            # slow step adaptation: step = a*raw + (1-a)*prev
                               # (a=0.5 ~ 2-cycle memory, 0.33 ~ 3-cycle)
+    dir_series=None,          # per-second +1/-1 trend direction; with
+    counter_levels=None,      # counter_levels=k, the ladder AGAINST the trend
+                              # gets only k levels (0 = one-sided grid)
+    nofill_timeout=None,      # seconds: if NOTHING has filled yet, abandon the
+                              # anchor and recycle (one-sided grids stall
+                              # otherwise when the direction call is wrong)
     step_confirm=None,        # (n, frac): keep current step until raw deviates
                               # > frac for n consecutive cycle starts
     gate_series=None,         # optional bool array aligned to secs: cycle may
@@ -191,9 +197,20 @@ def run(cfg, secs, rng, t_from=None, t_to=None):
         target = basis * cfg["target_pct"]
         maxloss = basis * cfg["sl_pct"]
         anchor_a, anchor_b = secs["ask_c"][i], secs["bid_c"][i]
+        q = cfg.get("anchor_quant")
+        if q:                       # recenter ladder on nearest Q-multiple so
+            m0 = (anchor_a + anchor_b) / 2   # live+sim pick identical centers
+            sh = round(m0 / q) * q - m0
+            anchor_a, anchor_b = anchor_a + sh, anchor_b + sh
         dg = cfg.get("digits", 3)
-        buys = [round(anchor_a + k * step, dg) for k in range(1, cfg["levels"] + 1)]
-        sells = [round(anchor_b - k * step, dg) for k in range(1, cfg["levels"] + 1)]
+        nb_lv = ns_lv = cfg["levels"]
+        if cfg.get("dir_series") is not None and cfg.get("counter_levels") is not None:
+            if cfg["dir_series"][i] >= 0:
+                ns_lv = cfg["counter_levels"]
+            else:
+                nb_lv = cfg["counter_levels"]
+        buys = [round(anchor_a + k * step, dg) for k in range(1, nb_lv + 1)]
+        sells = [round(anchor_b - k * step, dg) for k in range(1, ns_lv + 1)]
         longs, shorts = [], []          # entry prices
         realized = 0.0
         purged = False
@@ -223,6 +240,11 @@ def run(cfg, secs, rng, t_from=None, t_to=None):
                 while sells and bl <= sells[0]:
                     shorts.append(min(sells.pop(0), bo))
                     realized -= comm
+            # hybrid live-model: fills happen every bar (broker-side), but
+            # exit/purge decisions only at each second's last bar (bot-side)
+            if cfg.get("exit_on_sec_end") and j + 1 < hi and t[j + 1] == t[j]:
+                j += 1
+                continue
             # mark to market
             profit = realized \
                 + sum((bc - e) for e in longs) * C_ * lot \
@@ -249,6 +271,10 @@ def run(cfg, secs, rng, t_from=None, t_to=None):
                 elif outcome is None and cfg.get("last_stop_close", True) and \
                         not buys and not sells and (longs or shorts):
                     outcome = "all_filled"
+            if outcome is None and cfg.get("nofill_timeout") and \
+                    not longs and not shorts and \
+                    t[j] - ts > cfg["nofill_timeout"]:
+                outcome = "stale"
             if outcome:
                 pnl = realized \
                     + sum((bc - e) for e in longs) * C_ * lot \
